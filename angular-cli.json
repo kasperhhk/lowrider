@@ -10,7 +10,7 @@
       "assets": [
         "assets"
       ],
-      "index": "home.html",
+      "index": "index.html",
       "main": "main.ts",
       "test": "test.ts",
       "tsconfig": "tsconfig.json",
