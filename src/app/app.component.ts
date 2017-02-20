@@ -20,7 +20,7 @@ export class AppComponent {
 			this.history.shift();
 			this.history.push(key);
 			
-			const history = this.history.join("");
+			const history = this.history.join("").toLowerCase();
 			console.log(history);
 			console.log(history === this.toMatch);
 			if (history === this.toMatch) {
