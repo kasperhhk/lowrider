@@ -16,6 +16,9 @@ export class AppComponent {
 	@HostListener('window:keydown', ['$event'])
 	keyboardInput(event: KeyboardEvent) {
 		console.log(event);
+		console.log(event.key);
+		const key = event.key || String.fromCharCode(event.keyCode);
+		console.log(key);
 		if (this.listen) {
 			this.history.shift();
 			this.history.push(event.key);
