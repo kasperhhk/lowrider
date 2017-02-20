@@ -21,8 +21,6 @@ export class AppComponent {
 			this.history.push(key);
 			
 			const history = this.history.join("").toLowerCase();
-			console.log(history);
-			console.log(history === this.toMatch);
 			if (history === this.toMatch) {
 				if (this.smileys.length === 4) {
 					this.listen = false;
