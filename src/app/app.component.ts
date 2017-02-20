@@ -15,15 +15,12 @@ export class AppComponent {
 
 	@HostListener('window:keydown', ['$event'])
 	keyboardInput(event: KeyboardEvent) {
-		console.log(event);
-		console.log(event.key);
 		const key = event.key || String.fromCharCode(event.keyCode);
-		console.log(key);
 		if (this.listen) {
 			this.history.shift();
-			this.history.push(event.key);
+			this.history.push(key);
 			
-			let history = this.history.join("");
+			const history = this.history.join("");
 			if (history === this.toMatch) {
 				if (this.smileys.length === 4) {
 					this.listen = false;
