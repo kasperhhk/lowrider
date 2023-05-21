@@ -1,3 +1,4 @@
+import ThemeRegistry from '../theme/theme-registry'
 import './globals.css'
 import { Inter } from 'next/font/google'
 
@@ -15,7 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </head>
+      <body>
+        <ThemeRegistry>{children}</ThemeRegistry>
+      </body>
     </html>
   )
 }
