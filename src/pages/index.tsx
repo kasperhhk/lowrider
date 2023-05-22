@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google'
 import { Box, Button, Container, Stack, TextField, TextareaAutosize } from '@mui/material'
 import styles from '../styles/Home.module.css';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -98,6 +98,13 @@ interface ChatProps {
 }
 
 export function Chat({ messages, onChatMessage }: ChatProps) {
+  const chatareaRef = useRef<HTMLTextAreaElement>();
+
+  useEffect(() => {
+    if (chatareaRef.current)
+      chatareaRef.current.scrollTop = chatareaRef.current.scrollHeight;
+  }, [messages]);
+
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -112,7 +119,7 @@ export function Chat({ messages, onChatMessage }: ChatProps) {
 
   return (
     <Stack direction="column" spacing={0} className={styles.stack}>
-      <TextField disabled label="Chat" rows={10} multiline value={formatMessages()} fullWidth className={styles.chatarea}/>
+      <TextField disabled label="Chat" rows={10} multiline value={formatMessages()} fullWidth className={styles.chatarea} inputRef={chatareaRef}/>
       <form onSubmit={handleSubmit}>
         <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete="off"/>
       </form>
