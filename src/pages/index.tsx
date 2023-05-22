@@ -1,5 +1,5 @@
 import { Inter } from 'next/font/google'
-import { Box, Button, Container, Stack, TextField } from '@mui/material'
+import { Box, Button, Container, Stack, TextField, TextareaAutosize } from '@mui/material'
 import styles from '../styles/Home.module.css';
 import { FormEvent, useState } from 'react';
 
@@ -36,9 +36,7 @@ export default function Home() {
       const timestamp = `${date.getHours()}:${date.getMinutes()}`;
       const timestampedMessage = { ...rawMessage, timestamp };
       
-      const addMessage = [...messages, timestampedMessage];
-      setMessages(addMessage);
-      console.log("WebSocket message", event);
+      setMessages(m => [...m, timestampedMessage]);
     };
 
     newWebSocket.onerror = event => {
@@ -105,6 +103,7 @@ export function Chat({ messages, onChatMessage }: ChatProps) {
 
     const target: any = e.target;
     onChatMessage(target.message.value);
+    target.message.value = "";
   }
 
   function formatMessages() {
@@ -112,12 +111,12 @@ export function Chat({ messages, onChatMessage }: ChatProps) {
   }
 
   return (
-    <>
-      <textarea readOnly value={formatMessages()}></textarea>
+    <Stack direction="column" spacing={0} className={styles.stack}>
+      <TextField disabled label="Chat" rows={10} multiline value={formatMessages()} fullWidth className={styles.chatarea}/>
       <form onSubmit={handleSubmit}>
-        <input type="text" id="message" name="message" />
+        <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete="off"/>
       </form>
-    </>
+    </Stack>
   );
 }
 
