@@ -6,17 +6,61 @@ import { FormEvent, useState } from 'react';
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  let [connectionInfo, setConnectionInfo] = useState<ConnectionInfo>();
-  let [connected, setConnected] = useState<boolean>(false);
+  const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo>();
+  const [connected, setConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+
+  const [messages, setMessages] = useState<TimestampedChatMessage[]>([]);
+
+  const [error, setError] = useState<any>();
+
+  const [webSocket, setWebSocket] = useState<WebSocket>();
 
   async function connect(info: ConnectionInfo) {
     setConnectionInfo(info);
+    setConnecting(true);
 
-    await new Promise(resolve => 
-      setTimeout(resolve, 2000)
-    );
+    webSocket?.close();
+    var newWebSocket = new WebSocket(`ws://${info.host}:${info.port}/ws/${info.username}`);
 
-    setConnected(true);
+    newWebSocket.onopen = event => {
+      setConnected(true);
+      setConnecting(false);
+      console.log("WebSocket open", event);
+    };
+
+    newWebSocket.onmessage = event => {
+      const json = event.data;
+      const rawMessage: IncomingChatMessage = JSON.parse(json);
+      const date = new Date();
+      const timestamp = `${date.getHours()}:${date.getMinutes()}`;
+      const timestampedMessage = { ...rawMessage, timestamp };
+      
+      const addMessage = [...messages, timestampedMessage];
+      setMessages(addMessage);
+      console.log("WebSocket message", event);
+    };
+
+    newWebSocket.onerror = event => {
+      setConnected(false);
+      setError(event);
+      console.log("WebSocket error", event);
+    }
+
+    newWebSocket.onclose = event => {
+      setConnected(false);
+      setError("CLOSED OKAY");
+      console.log("WebSocket close", event);
+    }
+
+    setWebSocket(newWebSocket);
+  }
+
+  function handleChatMessage(message: string) {
+    if (!webSocket) return;
+    const data: OutgoingChatMessage = { message: message };
+    const json = JSON.stringify(data);
+    webSocket.send(json);
   }
 
   return (
@@ -26,12 +70,54 @@ export default function Home() {
           <h1 className={styles.header}>Hej!</h1>
         </main>
       </Container>
+      {error && <Container className={styles.error}><h1>ERROR: {error.toString()}</h1></Container>}
       <Box display="flex" justifyContent="center" alignItems="center">
         {!connectionInfo && <ChatSetup onConnect={connect}/>}
-        {connectionInfo && !connected && <span>Connecting...</span>}
-        {connectionInfo && connected && <span>Connected! :3</span>}
+        {connecting && <span>Connecting...</span>}
+        {connectionInfo && !connecting && !connected && <span>Disconnected.</span>}
+        {connected && <Chat messages={messages} onChatMessage={handleChatMessage}/>}
       </Box>
     </Container>
+  );
+}
+
+interface OutgoingChatMessage {
+  message: string
+}
+
+interface IncomingChatMessage {
+  sender: string,
+  message: string
+}
+
+interface TimestampedChatMessage extends IncomingChatMessage {
+  timestamp: string
+}
+
+interface ChatProps {
+  messages: TimestampedChatMessage[],
+  onChatMessage: (message: string) => void
+}
+
+export function Chat({ messages, onChatMessage }: ChatProps) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const target: any = e.target;
+    onChatMessage(target.message.value);
+  }
+
+  function formatMessages() {
+    return messages.map(m => `[${m.timestamp}] ${m.sender}: ${m.message}`).join('\n');
+  }
+
+  return (
+    <>
+      <textarea readOnly value={formatMessages()}></textarea>
+      <form onSubmit={handleSubmit}>
+        <input type="text" id="message" name="message" />
+      </form>
+    </>
   );
 }
 
@@ -42,7 +128,7 @@ interface ConnectionInfo {
 }
 
 interface ChatSetupProps {
-  onConnect: (info: ConnectionInfo) => void;
+  onConnect: (info: ConnectionInfo) => void
 }
 
 export function ChatSetup({ onConnect }: ChatSetupProps) {
