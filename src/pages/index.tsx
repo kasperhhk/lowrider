@@ -21,7 +21,7 @@ export default function Home() {
     setConnecting(true);
 
     webSocket?.close();
-    var newWebSocket = new WebSocket(`ws://${info.host}:${info.port}/ws/${info.username}`);
+    var newWebSocket = new WebSocket(`wss://${info.host}:${info.port}/ws/${info.username}`);
 
     newWebSocket.onopen = event => {
       setConnected(true);
