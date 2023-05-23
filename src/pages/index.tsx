@@ -31,6 +31,7 @@ export default function Home() {
 
     newWebSocket.onmessage = event => {
       const json = event.data;
+      console.log("json", json);
       const rawMessage: IncomingChatMessage = JSON.parse(json);
       const date = new Date();
       const timestamp = `${date.getHours()}:${date.getMinutes()}`;
