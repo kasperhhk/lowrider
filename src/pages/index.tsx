@@ -1,9 +1,6 @@
-import { Inter } from 'next/font/google'
-import { Box, Button, Container, Stack, TextField, TextareaAutosize } from '@mui/material'
+import { Box, Button, Container, Stack, TextField } from '@mui/material'
 import styles from '../styles/Home.module.css';
 import { FormEvent, useEffect, useRef, useState } from 'react';
-
-const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({});
@@ -21,7 +18,7 @@ export default function Home() {
     });
 
     webSocket?.close();
-    const newWebSocket = new WebSocket(`ws://${connection.host}:${connection.port}/ws/${connection.username}`);
+    const newWebSocket = new WebSocket(`${process.env.NEXT_PUBLIC_WS_PROTOCOL}://${connection.host}:${connection.port}/ws/${connection.username}`);
 
     newWebSocket.onopen = event => {
       setConnectionStatus({
