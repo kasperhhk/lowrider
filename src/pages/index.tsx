@@ -6,26 +6,27 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo>();
-  const [connected, setConnected] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({});
   const [messages, setMessages] = useState<TimestampedChatMessage[]>([]);
-
-  const [error, setError] = useState<any>();
-
   const [webSocket, setWebSocket] = useState<WebSocket>();
 
-  async function connect(info: ConnectionInfo) {
-    setConnectionInfo(info);
-    setConnecting(true);
+  function onConnect(connection: ChatConnection) {
+    doConnect(connection, false);
+  }
+
+  function doConnect(connection: ChatConnection, retry: boolean) {
+    setConnectionStatus({
+      connecting: true,
+      wasDisconnected: retry
+    });
 
     webSocket?.close();
-    var newWebSocket = new WebSocket(`wss://${info.host}:${info.port}/ws/${info.username}`);
+    const newWebSocket = new WebSocket(`ws://${connection.host}:${connection.port}/ws/${connection.username}`);
 
     newWebSocket.onopen = event => {
-      setConnected(true);
-      setConnecting(false);
+      setConnectionStatus({
+        connected: true
+      });
       console.log("WebSocket open", event);
     };
 
@@ -36,22 +37,24 @@ export default function Home() {
       const json = messageData.slice("CHATMSG:".length);
       const rawMessage: IncomingChatMessage = JSON.parse(json);
       const date = new Date();
-      const timestamp = `${date.getHours()}:${date.getMinutes()}`;
+      const timestamp = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
       const timestampedMessage = { ...rawMessage, timestamp };
       
       setMessages(m => [...m, timestampedMessage]);
     };
 
     newWebSocket.onerror = event => {
-      setConnected(false);
-      setError(event);
       console.log("WebSocket error", event);
+      newWebSocket.close();
     }
 
     newWebSocket.onclose = event => {
-      setConnected(false);
-      setError("CLOSED OKAY");
       console.log("WebSocket close", event);
+
+      setConnectionStatus({
+        wasDisconnected: true
+      });
+      doConnect(connection, true);
     }
 
     setWebSocket(newWebSocket);
@@ -69,18 +72,39 @@ export default function Home() {
     <Container maxWidth="lg">
       <Container>
         <main>
-          <h1 className={styles.header}>Hej!</h1>
+          <h1 className={styles.header}>Chat</h1>
         </main>
       </Container>
-      {error && <Container className={styles.error}><h1>ERROR: {error.toString()}</h1></Container>}
       <Box display="flex" justifyContent="center" alignItems="center">
-        {!connectionInfo && <ChatSetup onConnect={connect}/>}
-        {connecting && <span>Connecting...</span>}
-        {connectionInfo && !connecting && !connected && <span>Disconnected.</span>}
-        {connected && <Chat messages={messages} onChatMessage={handleChatMessage}/>}
+        <ConnectionInfo connectionStatus={connectionStatus}/>
+        {!connectionStatus.connecting && !connectionStatus.connected && <ChatSetup onConnect={onConnect}/>}
+        {connectionStatus.connected && <ChatMessages messages={messages} onChatMessage={handleChatMessage}/>}
       </Box>
     </Container>
   );
+}
+
+interface ConnectionStatus {
+  connected?: boolean;
+  connecting?: boolean;
+  wasDisconnected?: boolean;
+}
+
+interface ConnectionInfoProps {
+  connectionStatus: ConnectionStatus;
+}
+
+export function ConnectionInfo({ connectionStatus }: ConnectionInfoProps) {
+  if (connectionStatus.connecting) {
+    if (connectionStatus.wasDisconnected) {
+      return <span>Disconnected! Reconnecting...</span>
+    }
+    else {
+      return <span>Connecting...</span>
+    }
+  }
+
+  return <></>;
 }
 
 interface OutgoingChatMessage {
@@ -101,7 +125,7 @@ interface ChatProps {
   onChatMessage: (message: string) => void
 }
 
-export function Chat({ messages, onChatMessage }: ChatProps) {
+export function ChatMessages({ messages, onChatMessage }: ChatProps) {
   const chatareaRef = useRef<HTMLTextAreaElement>();
 
   useEffect(() => {
@@ -131,14 +155,14 @@ export function Chat({ messages, onChatMessage }: ChatProps) {
   );
 }
 
-interface ConnectionInfo {
+interface ChatConnection {
   username: string;
   host: string;
   port: string;
 }
 
 interface ChatSetupProps {
-  onConnect: (info: ConnectionInfo) => void
+  onConnect: (connection: ChatConnection) => void
 }
 
 export function ChatSetup({ onConnect }: ChatSetupProps) {
