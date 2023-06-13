@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { userService } from '../providers/UserService';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Controller, useForm } from 'react-hook-form';
-import { Button, TextField } from '@mui/material';
+import { Controller, ControllerFieldState, FieldError, useForm } from 'react-hook-form';
+import { Box, Button, Paper, TextField } from '@mui/material';
 
 export default function Login() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function Login() {
   }, []);
 
   const validationSchema = Yup.object().shape({
-    username: Yup.string().label('Username').default('').required('Username is required')
+    username: Yup.string().required('Username is required')
   });
 
   const { handleSubmit, control, register } = useForm({ resolver: yupResolver(validationSchema) });
@@ -31,9 +31,16 @@ export default function Login() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <TextField {...register('username')}/>      
-      <Button type="submit" variant='contained'>Login</Button>
-    </form>
+    <Box sx={{ margin: '10% auto auto auto', display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Paper sx={{ padding: '10px 50px 50px 50px', justifyItems: 'center', display: 'flex', justifyContent: 'center', width: 'fit-content', justifySelf: 'center', flexDirection: 'column', gap: '20px' }}>
+          <h1>Login</h1>
+          <Controller control={control} name='username' defaultValue='' render={({ field, fieldState }) =>
+            <TextField {...field} label="Username" error={fieldState.invalid} helperText={fieldState.error?.message} />
+          } />
+          <Button sx={{marginTop: '20px'}} type="submit" variant='contained'>Login</Button>
+        </Paper>
+      </form>
+    </Box>
   );
 }
