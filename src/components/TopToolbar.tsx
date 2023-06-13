@@ -1,6 +1,5 @@
-import { AppBar, Box, IconButton, Toolbar } from '@mui/material';
+import { AppBar, Box, Toolbar } from '@mui/material';
 import { LogoutButton } from './LogoutButton';
-import MenuIcon from '@mui/icons-material/Menu';
 
 export default function TopToolbar() {
   return (
