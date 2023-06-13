@@ -2,7 +2,7 @@ import { Button } from '@mui/material';
 import { userService } from '../providers/UserService';
 import { useRouter } from 'next/router';
 
-export function Logout() {
+export function LogoutButton() {
   const router = useRouter();
 
   function handleLogout() {

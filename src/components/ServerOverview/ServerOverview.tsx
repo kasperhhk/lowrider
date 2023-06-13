@@ -1,4 +1,4 @@
-import { IconButton, Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogActions, Button, Box } from '@mui/material';
 import { useContext, useState } from 'react';
 import { ServerListContext, ServerDefinition } from '../../providers/ServerListProvider';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
@@ -33,7 +33,9 @@ export default function ServerOverview() {
     <ul>
       {serverList.map(server =>
         <li key={server.host}>
-          <span>{server.name} ({server.host})</span>
+          <Box sx={{border: 'black 1px solid'}}>
+            <span>{server.name} ({server.host})</span>
+          </Box>
           <IconButton color='error' onClick={() => openDeleteConfirm()}><HighlightOffSharpIcon /></IconButton>
           <Dialog open={openConfirmDelete} onClose={() => closeConfirmDelete(false)}>
             <DialogTitle>

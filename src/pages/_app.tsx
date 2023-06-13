@@ -6,7 +6,7 @@ import Head from 'next/head';
 import { ServerListProvider } from '../providers/ServerListProvider';
 import { AuthRouteGuard } from '../providers/AuthRouteGuard';
 import { UserProvider } from '../providers/UserProvider';
-import { Logout } from '../components/Logout';
+import TopToolbar from '../components/TopToolbar';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -24,7 +24,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <UserProvider>
               <ServerListProvider>
                 
-                <Logout />
+                <TopToolbar />
                 <Component {...pageProps} />
 
               </ServerListProvider>
