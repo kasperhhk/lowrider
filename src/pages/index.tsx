@@ -1,12 +1,12 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, TextField, useTheme } from '@mui/material';
-import { FormEvent, useContext, useState } from 'react';
-import { ServerDefinition, ServerListContext } from '../providers/ServerListProvider';
-import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
-import ServerOverview from '../components/ServerOverview';
+import { useContext } from 'react';
+import ServerOverview from '../components/ServerOverview/ServerOverview';
+import { UserContext } from '../providers/UserProvider';
 
-export default function Home() {  
+export default function Home() {
+  const user = useContext(UserContext);
+
   return (<>
-    <h1>Hey!</h1>
+    <h1>Hey {user.username}!</h1>
     <ServerOverview />
   </>);
 }

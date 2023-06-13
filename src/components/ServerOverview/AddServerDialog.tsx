@@ -1,6 +1,6 @@
 import { TextField, Button, DialogContent, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { FormEvent, useState } from 'react';
-import { ServerDefinition } from '../providers/ServerListProvider';
+import { ServerDefinition } from '../../providers/ServerListProvider';
 
 const initialState = {
   name: {

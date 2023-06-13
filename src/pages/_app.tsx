@@ -4,6 +4,9 @@ import type { AppProps } from 'next/app'
 import theme from '../styles/theme'
 import Head from 'next/head';
 import { ServerListProvider } from '../providers/ServerListProvider';
+import { AuthRouteGuard } from '../providers/AuthRouteGuard';
+import { UserProvider } from '../providers/UserProvider';
+import { Logout } from '../components/Logout';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -12,12 +15,22 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
       <NoSsr>
-        <ServerListProvider>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthRouteGuard render='public'>
             <Component {...pageProps} />
-          </ThemeProvider>
-        </ServerListProvider>
+          </AuthRouteGuard>
+          <AuthRouteGuard render='private'>
+            <UserProvider>
+              <ServerListProvider>
+                
+                <Logout />
+                <Component {...pageProps} />
+
+              </ServerListProvider>
+            </UserProvider>
+          </AuthRouteGuard>
+        </ThemeProvider>
       </NoSsr>
     </>
   );

@@ -1,11 +1,11 @@
 import { IconButton, Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import { useContext, useState } from 'react';
-import { ServerListContext, ServerDefinition } from '../providers/ServerListProvider';
+import { ServerListContext, ServerDefinition } from '../../providers/ServerListProvider';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';
 import AddServerDialog from './AddServerDialog';
 
 export default function ServerOverview() {
-  const {serverList, setServerList} = useContext(ServerListContext);
+  const { serverList, setServerList } = useContext(ServerListContext);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
   const [openAdd, setAdd] = useState(false);
 
@@ -31,10 +31,10 @@ export default function ServerOverview() {
 
   return (<>
     <ul>
-      {serverList.map(server => 
+      {serverList.map(server =>
         <li key={server.host}>
           <span>{server.name} ({server.host})</span>
-          <IconButton color='error' onClick={() => openDeleteConfirm()}><HighlightOffSharpIcon/></IconButton>
+          <IconButton color='error' onClick={() => openDeleteConfirm()}><HighlightOffSharpIcon /></IconButton>
           <Dialog open={openConfirmDelete} onClose={() => closeConfirmDelete(false)}>
             <DialogTitle>
               Delete server &quot;{server.name}&quot; ({server.host})?
@@ -48,6 +48,6 @@ export default function ServerOverview() {
       )}
     </ul>
     <Button variant="contained" onClick={() => setAdd(true)}>Add Server</Button>
-    <AddServerDialog open={openAdd} onClose={(server) => handleAddClose(server)}/>
+    <AddServerDialog open={openAdd} onClose={(server) => handleAddClose(server)} />
   </>);
 }
