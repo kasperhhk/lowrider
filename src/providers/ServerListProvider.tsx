@@ -17,14 +17,14 @@ function getInitialState(): ServerDefinition[] {
 
 export const ServerListContext = createContext<{ serverList: ServerDefinition[], setServerList: Dispatch<SetStateAction<ServerDefinition[]>> }>({} as any);
 
-export const ServerListProvider: React.FC<PropsWithChildren> = props => {
+export function ServerListProvider({ children }: PropsWithChildren) {
   const [serverList, setServerList] = useState(getInitialState);
 
   useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(serverList));
   }, [serverList]);
 
-  return <ServerListContext.Provider value={{ serverList, setServerList }}>
-    {props.children}
-  </ServerListContext.Provider>;
+return <ServerListContext.Provider value={{ serverList, setServerList }}>
+  {children}
+</ServerListContext.Provider>;
 }

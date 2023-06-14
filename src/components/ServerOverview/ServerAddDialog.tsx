@@ -13,7 +13,7 @@ const initialState = {
   }
 }
 
-export default function AddServerDialog({ open, onClose }: { open: boolean, onClose: (server?: ServerDefinition) => void }) {
+export default function ServerAddDialog({ open, onClose }: { open: boolean, onClose: (server?: ServerDefinition) => void }) {
   const [name, setName] = useState(initialState.name);
   const [host, setHost] = useState(initialState.host);
 

@@ -7,6 +7,7 @@ import { ServerListProvider } from '../providers/ServerListProvider';
 import { AuthRouteGuard } from '../providers/AuthRouteGuard';
 import { UserProvider } from '../providers/UserProvider';
 import TopToolbar from '../components/TopToolbar';
+import { ConnectionProvider } from '../providers/ConnectionProvider';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -23,10 +24,12 @@ export default function App({ Component, pageProps }: AppProps) {
           <AuthRouteGuard render='private'>
             <UserProvider>
               <ServerListProvider>
+                <ConnectionProvider>
                 
                 <TopToolbar />
                 <Component {...pageProps} />
 
+                </ConnectionProvider>
               </ServerListProvider>
             </UserProvider>
           </AuthRouteGuard>
