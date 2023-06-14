@@ -1,12 +1,17 @@
-import { AppBar, Box, Toolbar } from '@mui/material';
+import { AppBar, Box, Toolbar, Typography } from '@mui/material';
 import { LogoutButton } from './LogoutButton';
+import { useContext } from 'react';
+import { UserContext } from '../providers/UserProvider';
 
 export default function TopToolbar() {
+  const user = useContext(UserContext);
+
   return (
     <Box>
       <AppBar position="static">
-        <Toolbar sx={{flexDirection: 'row-reverse' }}>
+        <Toolbar sx={{flexDirection: 'row-reverse', gap: '20px' }}>
           <LogoutButton />
+          <Typography variant='h6'>{user.username}</Typography>
         </Toolbar>
       </AppBar>
     </Box>
