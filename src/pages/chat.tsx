@@ -5,7 +5,6 @@ import { ServerDefinition } from '../providers/ServerListProvider';
 import { UserContext } from '../providers/UserProvider';
 import { WEBSOCKET_URL } from '../utils';
 import { Box, Stack, TextField, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
 
 interface OutgoingChatMessage {
   message: string
@@ -16,15 +15,23 @@ interface IncomingChatMessage {
   message: string
 }
 
-interface TimestampedChatMessage extends IncomingChatMessage {
+declare type ChatMessage = TimestampedChatMessage | SystemChatMessage;
+
+interface TimestampedChatMessage {
+  type: 'chatmsg',
+  sender: string,
+  message: string,
+  timestamp: string
+}
+
+interface SystemChatMessage {
+  type: 'systemchatmsg',
+  message: string,
   timestamp: string
 }
 
 export default function Chat() {
-  const x = useContext(ConnectionContext);
-  const connectedServer = x.connectedServer;
-  console.log(x);
-  const router = useRouter();
+  const { connectedServer } = useContext(ConnectionContext);
 
   if (!connectedServer) {
     //router.push('/');
@@ -41,16 +48,43 @@ export default function Chat() {
   );
 }
 
+function createTimestamp() {
+  const date = new Date();
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function createSystemChatMsg(message: string): SystemChatMessage {
+  const date = new Date();
+
+  return {
+    type: 'systemchatmsg',
+    timestamp: createTimestamp(),
+    message
+  }
+}
+
 export function ChatWindow({ server }: { server: ServerDefinition }) {
   const user = useContext(UserContext);
+
+  const [messageHistory, setMessageHistory] = useState<ChatMessage[]>([createSystemChatMsg('Connecting...')]);
+
+  const onClose = useCallback(() => {
+    setMessageHistory(m => [...m, createSystemChatMsg('Disconnected!'), createSystemChatMsg('Reconnecting...')]);
+  }, [setMessageHistory])
+
+  const onOpen = useCallback(() => {
+    setMessageHistory(m => [...m, createSystemChatMsg('Connected.')]);
+  }, [setMessageHistory]);
 
   const websocketUrl = WEBSOCKET_URL(server, user);
   const { lastMessage, sendMessage } = useWebSocket(websocketUrl, {
     share: true,
-    retryOnError: true
+    retryOnError: true,
+    shouldReconnect: () => true,
+    reconnectAttempts: 100,
+    onClose,
+    onOpen
   });
-
-  const [messageHistory, setMessageHistory] = useState<TimestampedChatMessage[]>([]);
 
   useEffect(() => {
     if (lastMessage !== null) {
@@ -59,9 +93,8 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
 
       const json = messageData.slice("CHATMSG:".length);
       const rawMessage = JSON.parse(json) as IncomingChatMessage;
-      const date = new Date();
-      const timestamp = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-      const timestampedMessage = { ...rawMessage, timestamp };
+      const timestamp = createTimestamp();
+      const timestampedMessage = { ...rawMessage, timestamp, type: 'chatmsg' } as TimestampedChatMessage;
 
       setMessageHistory(m => [...m, timestampedMessage]);
     }
@@ -82,7 +115,20 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
   }, [messageHistory]);
 
   function formatMessageHistory() {
-    return messageHistory.map(m => `[${m.timestamp}] ${m.sender}: ${m.message}`).join('\n');
+    return messageHistory.map(m => {
+      if (m.type === 'chatmsg')
+        return formatChatMessage(m);
+      if (m.type === 'systemchatmsg')
+        return formatSystemMessage(m);
+    }).join('\n');
+  }
+
+  function formatChatMessage(message: TimestampedChatMessage) {
+    return `[${message.timestamp}] ${message.sender}: ${message.message}`;
+  }
+
+  function formatSystemMessage(message: SystemChatMessage) {
+    return `[${message.timestamp}] ${message.message}`;
   }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -90,7 +136,7 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
 
     const target = (e.target as any).message as HTMLInputElement;
     const message = target.value;
-    
+
     sendChatMessage(message);
     target.value = "";
   }
