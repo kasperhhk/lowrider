@@ -1,20 +1,52 @@
-import { PropsWithChildren, createContext, useState } from 'react';
+import { PropsWithChildren, createContext, useCallback, useEffect, useState } from 'react';
 import { ServerDefinition } from './ServerListProvider';
+import { useRouter } from 'next/router';
 
-export const ConnectionContext = createContext<{ connectedServer: ServerDefinition | null, connect: (server: ServerDefinition) => void, disconnect: () => void }>({} as any);
+interface Connection {
+  connectedServer: ServerDefinition | null;
+  connect: (server: ServerDefinition) => void;
+  disconnect: () => void;
+}
+
+export const ConnectionContext = createContext<Connection>({} as any);
+
+const stat: any = {
+  h: []
+};
+if (typeof window !== "undefined") {
+  (window as any).stat = stat;
+}
 
 export function ConnectionProvider({ children }: PropsWithChildren) {
   const [connectedServer, setConnectedServer] = useState<ServerDefinition | null>(null);
+  const router = useRouter();
 
-  function connect(server: ServerDefinition) {
+  const connect = useCallback((server: ServerDefinition) => {
     setConnectedServer(server);
-  }
+    router.push('/chat')
+  }, [setConnectedServer, router]);
 
-  function disconnect() {
+  const disconnect = useCallback(() => {
     setConnectedServer(null);
-  }
+  }, [setConnectedServer]);
 
-  return <ConnectionContext.Provider value={{ connectedServer, connect, disconnect }}>
+  const [connection, setConnection] = useState<Connection>({ connectedServer: null, connect, disconnect });
+  useEffect(() => {
+    //console.log("useeffect", connectedServer, connect, disconnect)
+    stat.h.push({ connectedServer, connect, disconnect });
+    setConnection({ connectedServer, connect, disconnect });
+
+    return () => {
+      stat.h.push("cleanup");
+    }
+  }, [connectedServer, connect, disconnect]);
+
+  useEffect(() => {
+    console.log("connectionprovider mounted");
+    return () => console.log("connectionprovider unmounted");
+  }, []);
+
+  return <ConnectionContext.Provider value={connection}>
     {children}
   </ConnectionContext.Provider>
 }

@@ -39,7 +39,4 @@ const theme = createTheme({
   }
 });
 
-if (typeof window !== undefined) {
-  (<any>window).theme = theme;
-}
 export default theme;

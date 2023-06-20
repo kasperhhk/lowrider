@@ -21,6 +21,11 @@ export function ServerListProvider({ children }: PropsWithChildren) {
   const [serverList, setServerList] = useState(getInitialState);
 
   useEffect(() => {
+    console.log("serverlist mounted");
+    return () => console.log("serverlist unmounted");
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(serverList));
   }, [serverList]);
 

@@ -11,7 +11,7 @@ export default function TopToolbar() {
       <AppBar position="static">
         <Toolbar sx={{flexDirection: 'row-reverse', gap: '20px' }}>
           <LogoutButton />
-          <Typography variant='h6'>{user.username}</Typography>
+          <Typography variant='h6' component={'div'}>{user.username}</Typography>
         </Toolbar>
       </AppBar>
     </Box>
