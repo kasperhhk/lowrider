@@ -5,6 +5,7 @@ import { ConnectionContext } from '../../providers/ConnectionProvider';
 import { ServerDefinition } from '../../providers/ServerListProvider';
 import { UserContext } from '../../providers/UserProvider';
 import { WEBSOCKET_URL } from '../../utils';
+import { useRouter } from 'next/router';
 
 interface OutgoingChatMessage {
   message: string
@@ -34,8 +35,10 @@ interface SystemChatMessage {
 
 export default function Chat() {
   const { connectedServer } = useContext(ConnectionContext);
+  const router = useRouter();
 
   if (!connectedServer) {
+    router.push('/servers');
     return <></>;
   }
 
@@ -118,13 +121,16 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
     target.value = "";
   }
 
-  return (
-    <Stack>
-      {messageHistory.map(msg => <ChatMessage key={msg.id} message={msg}/>)}
-      <form onSubmit={handleSubmit}>
-        <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete='off' />
-      </form>
+  const ref = useRef<HTMLDivElement>(null);
+
+  return (<>
+    <Stack ref={ref}>
+      {messageHistory.map(msg => <ChatMessage key={msg.id} message={msg} />)}
     </Stack>
+    <form onSubmit={handleSubmit}>
+      <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete='off' />
+    </form>
+  </>
   );
 }
 
@@ -134,10 +140,10 @@ function timestampFormat(date: Date) {
 
 export function ChatMessage({ message }: { message: ChatMessage }) {
   if (message.type === 'chatmsg') {
-    return <Box><time>[{timestampFormat(message.timestamp)}]</time><span>${message.sender}</span><span>:</span><span>${message.message}</span></Box>;
-  }  
+    return <Box><time>[{timestampFormat(message.timestamp)}]</time><span>{message.sender}</span><span>:</span><span>{message.message}</span></Box>;
+  }
   else if (message.type === 'systemchatmsg') {
-    return <Box><time>[{timestampFormat(message.timestamp)}]</time><span>${message.message}</span></Box>;
+    return <Box><time>[{timestampFormat(message.timestamp)}]</time><span>{message.message}</span></Box>;
   }
 
   return <></>;

@@ -1,3 +1,6 @@
+'use client';
+import 'overlayscrollbars/overlayscrollbars.css';
+
 import { Box, CssBaseline, NoSsr, ThemeProvider, Toolbar } from '@mui/material';
 import { AppProps } from 'next/app';
 import theme from '../styles/theme';
