@@ -9,10 +9,11 @@ import { ChatBar } from '../components/Chat/ChatBar';
 import TopToolbar from '../components/TopToolbar';
 import { PropsWithChildren } from 'react';
 import { useRouter } from 'next/router';
-import { AuthRouteGuard, isLoginPage } from '../providers/AuthRouteGuard';
+import { AuthRouteGuard } from '../providers/AuthRouteGuard';
 import { UserProvider } from '../providers/UserProvider';
 import { ServerListProvider } from '../providers/ServerListProvider';
 import { ConnectionProvider } from '../providers/ConnectionProvider';
+import { isLoginPage } from '../route-utils';
 
 export function LoggedIn({ children }: PropsWithChildren) {
   return <AuthRouteGuard>
@@ -34,15 +35,13 @@ export function BaseLayout({ children }: PropsWithChildren) {
 
   return (
     <LoggedIn>
-      <Box sx={{ display: 'flex' }}>
-        <Box sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-          <TopToolbar />
-        </Box>
-        <Box><ChatBar /></Box>
-        <Box component="main" sx={{ p: 3 }}>
+      <TopToolbar />
+      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+        <Box component="main" sx={{ p: 3, flexGrow: 1 }}>
           <Toolbar />
           {children}
         </Box>
+        <ChatBar />
       </Box>
     </LoggedIn>
   );

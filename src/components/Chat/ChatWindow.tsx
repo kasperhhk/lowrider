@@ -1,11 +1,10 @@
-import { FormEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { FormEvent, useCallback, useContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
-import { Box, Stack, TextField, Typography } from '@mui/material';
-import { ConnectionContext } from '../../providers/ConnectionProvider';
+import { Box, TextField } from '@mui/material';
 import { ServerDefinition } from '../../providers/ServerListProvider';
 import { UserContext } from '../../providers/UserProvider';
 import { WEBSOCKET_URL } from '../../utils';
-import { useRouter } from 'next/router';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 
 interface OutgoingChatMessage {
   message: string
@@ -33,18 +32,6 @@ interface SystemChatMessage {
   id: number
 }
 
-export default function Chat() {
-  const { connectedServer } = useContext(ConnectionContext);
-  const router = useRouter();
-
-  if (!connectedServer) {
-    router.push('/servers');
-    return <></>;
-  }
-
-  return <ChatWindow server={connectedServer}></ChatWindow>;
-}
-
 let nextId = 0;
 function createId() {
   return nextId++;
@@ -65,10 +52,14 @@ function createSystemChatMsg(message: string): SystemChatMessage {
   }
 }
 
+const initialMessageHistory = (new Array(50)).fill(0).map((_, i) =>
+  createSystemChatMsg('INITIAL ' + i)) as ChatMessage[];
+initialMessageHistory.push(createSystemChatMsg('Connecting...'));
+
 export function ChatWindow({ server }: { server: ServerDefinition }) {
   const user = useContext(UserContext);
 
-  const [messageHistory, setMessageHistory] = useState<ChatMessage[]>([createSystemChatMsg('Connecting...')]);
+  const [messageHistory, setMessageHistory] = useState<ChatMessage[]>(initialMessageHistory);
 
   const onClose = useCallback(() => {
     setMessageHistory(m => [...m, createSystemChatMsg('Disconnected!'), createSystemChatMsg('Reconnecting...')]);
@@ -121,15 +112,15 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
     target.value = "";
   }
 
-  const ref = useRef<HTMLDivElement>(null);
-
   return (<>
-    <Stack ref={ref}>
+    <OverlayScrollbarsComponent options={{ overflow: { y: 'scroll' } }} defer>
       {messageHistory.map(msg => <ChatMessage key={msg.id} message={msg} />)}
-    </Stack>
-    <form onSubmit={handleSubmit}>
-      <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete='off' />
-    </form>
+    </OverlayScrollbarsComponent>
+    <Box>
+      <form onSubmit={handleSubmit}>
+        <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete='off' />
+      </form>
+    </Box>
   </>
   );
 }
