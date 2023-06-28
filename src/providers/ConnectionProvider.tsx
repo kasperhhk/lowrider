@@ -23,7 +23,7 @@ export function ConnectionProvider({ children }: PropsWithChildren) {
 
   const connect = useCallback((server: ServerDefinition) => {
     setConnectedServer(server);
-    router.push('/chat')
+    router.push('/');
   }, [setConnectedServer, router]);
 
   const disconnect = useCallback(() => {

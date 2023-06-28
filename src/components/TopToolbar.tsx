@@ -1,4 +1,4 @@
-import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Toolbar, Typography } from '@mui/material';
 import { LogoutButton } from './LogoutButton';
 import { useContext, useState } from 'react';
 import { UserContext } from '../providers/UserProvider';
@@ -10,9 +10,9 @@ export default function TopToolbar() {
 
   return (
     <Box>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar sx={{ flexGrow: 1, gap: '20px' }}>
-          <Container component={'div'} sx={{ flexGrow: 1 }}><ServerDisconnect /></Container>
+          <Box component={'div'} sx={{ flexGrow: 1 }}><ServerDisconnect /></Box>
           <Typography variant='h6' component={'div'}>{user.username}</Typography>
           <LogoutButton />
         </Toolbar>

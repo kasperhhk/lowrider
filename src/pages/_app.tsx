@@ -1,27 +1,51 @@
-'use client'
-
-import '@/styles/globals.css'
-import { CssBaseline, NoSsr, ThemeProvider } from '@mui/material'
-import type { AppProps } from 'next/app'
-import theme from '../styles/theme'
+import { Box, CssBaseline, NoSsr, ThemeProvider, Toolbar } from '@mui/material';
+import { AppProps } from 'next/app';
+import theme from '../styles/theme';
 import Head from 'next/head';
-import { ServerListProvider } from '../providers/ServerListProvider';
-import { AuthRouteGuard, isPublicPage } from '../providers/AuthRouteGuard';
-import { UserProvider } from '../providers/UserProvider';
+import { ChatBar } from '../components/Chat/ChatBar';
 import TopToolbar from '../components/TopToolbar';
-import { ConnectionProvider } from '../providers/ConnectionProvider';
+import { PropsWithChildren } from 'react';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { AuthRouteGuard, isLoginPage } from '../providers/AuthRouteGuard';
+import { UserProvider } from '../providers/UserProvider';
+import { ServerListProvider } from '../providers/ServerListProvider';
+import { ConnectionProvider } from '../providers/ConnectionProvider';
+
+export function LoggedIn({ children }: PropsWithChildren) {
+  return <AuthRouteGuard>
+    <UserProvider>
+      <ServerListProvider>
+        <ConnectionProvider>
+          {children}
+        </ConnectionProvider>
+      </ServerListProvider>
+    </UserProvider>
+  </AuthRouteGuard>;
+}
+
+export function BaseLayout({ children }: PropsWithChildren) {
+  const router = useRouter();
+  if (isLoginPage(router.asPath)) {
+    return <>{children}</>;
+  }
+
+  return (
+    <LoggedIn>
+      <Box sx={{ display: 'flex' }}>
+        <Box sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+          <TopToolbar />
+        </Box>
+        <Box><ChatBar /></Box>
+        <Box component="main" sx={{ p: 3 }}>
+          <Toolbar />
+          {children}
+        </Box>
+      </Box>
+    </LoggedIn>
+  );
+}
 
 export default function App({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-  const includeProviders = !isPublicPage(router.asPath);
-
-  useEffect(() => {
-    console.log("app mounted");
-    return () => console.log("app unmounted");
-  }, []);
-
   return (
     <>
       <Head>
@@ -30,23 +54,9 @@ export default function App({ Component, pageProps }: AppProps) {
       <NoSsr>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-
-          {!includeProviders && <Component {...pageProps} />}
-
-          {includeProviders &&
-            <AuthRouteGuard>
-              <UserProvider>
-                <ServerListProvider>
-                  <ConnectionProvider>
-
-                    <TopToolbar />
-                    <Component {...pageProps} />
-
-                  </ConnectionProvider>
-                </ServerListProvider>
-              </UserProvider>
-            </AuthRouteGuard>}
-
+          <BaseLayout>
+            <Component {...pageProps} />
+          </BaseLayout>
         </ThemeProvider>
       </NoSsr>
     </>

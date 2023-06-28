@@ -1,4 +1,4 @@
-import { IconButton, Dialog, DialogTitle, DialogActions, Button, Stack, Container, Paper, Card, Typography, CardActionArea, CardContent, useTheme, alpha } from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogActions, Button, Stack, Card, Typography, CardActionArea, CardContent, useTheme, alpha } from '@mui/material';
 import { ServerDefinition, ServerListContext } from '../../providers/ServerListProvider';
 import { useContext, useState } from 'react';
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp';

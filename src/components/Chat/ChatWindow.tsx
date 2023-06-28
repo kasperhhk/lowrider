@@ -1,10 +1,10 @@
 import { FormEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { ConnectionContext } from '../providers/ConnectionProvider';
 import useWebSocket from 'react-use-websocket';
-import { ServerDefinition } from '../providers/ServerListProvider';
-import { UserContext } from '../providers/UserProvider';
-import { WEBSOCKET_URL } from '../utils';
 import { Box, Stack, TextField, Typography } from '@mui/material';
+import { ConnectionContext } from '../../providers/ConnectionProvider';
+import { ServerDefinition } from '../../providers/ServerListProvider';
+import { UserContext } from '../../providers/UserProvider';
+import { WEBSOCKET_URL } from '../../utils';
 
 interface OutgoingChatMessage {
   message: string
@@ -21,45 +21,44 @@ interface TimestampedChatMessage {
   type: 'chatmsg',
   sender: string,
   message: string,
-  timestamp: string
+  timestamp: Date,
+  id: number
 }
 
 interface SystemChatMessage {
   type: 'systemchatmsg',
   message: string,
-  timestamp: string
+  timestamp: Date,
+  id: number
 }
 
 export default function Chat() {
   const { connectedServer } = useContext(ConnectionContext);
 
   if (!connectedServer) {
-    //router.push('/');
     return <></>;
   }
 
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <Stack>
-        <Typography variant="h1">Chat</Typography>
-        {connectedServer && <ChatWindow server={connectedServer}></ChatWindow>}
-      </Stack>
-    </Box>
-  );
+  return <ChatWindow server={connectedServer}></ChatWindow>;
+}
+
+let nextId = 0;
+function createId() {
+  return nextId++;
 }
 
 function createTimestamp() {
   const date = new Date();
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  return date;
 }
 
 function createSystemChatMsg(message: string): SystemChatMessage {
-  const date = new Date();
-
+  const timestamp = createTimestamp();
   return {
     type: 'systemchatmsg',
-    timestamp: createTimestamp(),
-    message
+    timestamp: timestamp,
+    message,
+    id: createId()
   }
 }
 
@@ -94,7 +93,8 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
       const json = messageData.slice("CHATMSG:".length);
       const rawMessage = JSON.parse(json) as IncomingChatMessage;
       const timestamp = createTimestamp();
-      const timestampedMessage = { ...rawMessage, timestamp, type: 'chatmsg' } as TimestampedChatMessage;
+      const id = createId();
+      const timestampedMessage = { ...rawMessage, timestamp, type: 'chatmsg', id } as TimestampedChatMessage;
 
       setMessageHistory(m => [...m, timestampedMessage]);
     }
@@ -108,29 +108,6 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
     sendMessage(messageData);
   }, [sendMessage]);
 
-  const chatareaRef = useRef<HTMLTextAreaElement>();
-  useEffect(() => {
-    if (chatareaRef.current)
-      chatareaRef.current.scrollTop = chatareaRef.current.scrollHeight;
-  }, [messageHistory]);
-
-  function formatMessageHistory() {
-    return messageHistory.map(m => {
-      if (m.type === 'chatmsg')
-        return formatChatMessage(m);
-      if (m.type === 'systemchatmsg')
-        return formatSystemMessage(m);
-    }).join('\n');
-  }
-
-  function formatChatMessage(message: TimestampedChatMessage) {
-    return `[${message.timestamp}] ${message.sender}: ${message.message}`;
-  }
-
-  function formatSystemMessage(message: SystemChatMessage) {
-    return `[${message.timestamp}] ${message.message}`;
-  }
-
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -143,10 +120,25 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
 
   return (
     <Stack>
-      <TextField disabled label="Chat" rows={10} multiline value={formatMessageHistory()} fullWidth inputRef={chatareaRef} />
+      {messageHistory.map(msg => <ChatMessage key={msg.id} message={msg}/>)}
       <form onSubmit={handleSubmit}>
         <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete='off' />
       </form>
     </Stack>
   );
+}
+
+function timestampFormat(date: Date) {
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
+export function ChatMessage({ message }: { message: ChatMessage }) {
+  if (message.type === 'chatmsg') {
+    return <Box><time>[{timestampFormat(message.timestamp)}]</time><span>${message.sender}</span><span>:</span><span>${message.message}</span></Box>;
+  }  
+  else if (message.type === 'systemchatmsg') {
+    return <Box><time>[{timestampFormat(message.timestamp)}]</time><span>${message.message}</span></Box>;
+  }
+
+  return <></>;
 }
