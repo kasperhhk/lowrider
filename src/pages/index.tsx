@@ -33,7 +33,7 @@ export default function Home() {
       const messageData: string = event.data;
       console.log("messageData", messageData);
 
-      const json = messageData.slice("CHATMSG:".length);
+      const json = messageData.slice("CHAT:CHATMSG:".length);
       const rawMessage: IncomingChatMessage = JSON.parse(json);
       const date = new Date();
       const timestamp = `${date.getHours()}:${date.getMinutes()}`;
@@ -61,7 +61,7 @@ export default function Home() {
     if (!webSocket) return;
     const data: OutgoingChatMessage = { message: message };
     const json = JSON.stringify(data);
-    const messageData = "CHATMSG:" + json;
+    const messageData = "CHAT:CHATMSG:" + json;
     webSocket.send(messageData);
   }
 
