@@ -88,7 +88,7 @@ interface OutgoingChatMessage {
 }
 
 interface IncomingChatMessage {
-  sender: string,
+  user: string,
   message: string
 }
 
@@ -118,7 +118,7 @@ export function Chat({ messages, onChatMessage }: ChatProps) {
   }
 
   function formatMessages() {
-    return messages.map(m => `[${m.timestamp}] ${m.sender}: ${m.message}`).join('\n');
+    return messages.map(m => `[${m.timestamp}] ${m.user}: ${m.message}`).join('\n');
   }
 
   return (
