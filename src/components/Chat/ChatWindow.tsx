@@ -113,14 +113,18 @@ export function ChatWindow({ server }: { server: ServerDefinition }) {
   }
 
   return (<>
-    <OverlayScrollbarsComponent options={{ overflow: { y: 'scroll' } }} defer>
-      {messageHistory.map(msg => <ChatMessage key={msg.id} message={msg} />)}
-    </OverlayScrollbarsComponent>
-    <Box>
+    <div style={{ flex: '1', width: '100%', overflow: 'hidden' }}>
+      <div style={{ overflow: 'hidden' }}>
+        <div>
+          {messageHistory.map(msg => <ChatMessage key={msg.id} message={msg} />)}
+        </div>
+      </div>
+    </div>
+    <div>
       <form onSubmit={handleSubmit}>
         <TextField id="message" helperText="Send chat message" variant="filled" autoFocus autoComplete='off' />
       </form>
-    </Box>
+    </div>
   </>
   );
 }

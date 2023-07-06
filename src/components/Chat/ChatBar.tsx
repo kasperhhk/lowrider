@@ -17,7 +17,7 @@ export function ChatBar() {
   }
 
   return (
-    <Box sx={{ width: '300px', border: '1px solid rgb(255, 255, 255, 0.30)', paddingLeft: '5px', boxSizing: 'border-box' }}>
+    <Box sx={{ width: '300px', border: '1px solid rgb(255, 255, 255, 0.30)', paddingLeft: '5px', boxSizing: 'border-box', height: '100%' }}>
       <Toolbar />
       <ChatWindow server={connectedServer} />
     </Box>
